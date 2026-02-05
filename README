@@ -1,0 +1,70 @@
+# TailWord – Discord Word Chain Bot
+
+TailWord is a multiplayer word-chain game bot for Discord servers, built to keep communities active and competitive.
+
+Players take turns sending words where each new word must start with the final letter of the previous one. Break the chain, and the round resets!
+
+TailWord adds stats, leaderboards, rewards, and global gameplay progression across servers.
+
+---
+
+## Features
+
+• Word-chain gameplay  
+• Automatic round resets on failure  
+• Server leaderboards  
+• Global player statistics  
+• Save & reward system  
+• Vote rewards via top.gg  
+• Giveaway drops across servers  
+• Server-specific game channels  
+• Anti-spam protections  
+• Owner/admin tools  
+• Multi-server support  
+
+---
+
+## How the Game Works
+
+1. A player starts with any word.
+2. The next player must send a word starting with the previous word’s last letter.
+3. The same player cannot play twice in a row.
+4. Used words cannot be repeated in a round.
+5. If a player fails, the chain resets and a new round begins.
+
+Example:
+apple → egg → grape → elephant → tiger
+
+
+---
+
+## Commands
+
+| Command | Description |
+|----------|------------|
+| `/setup-channel` | Set the channel where the game runs |
+| `/stats` | View your or another player’s stats |
+| `/leaderboard` | Show server leaderboard |
+| `/vote` | Get voting link for rewards |
+| `/donatesave` | Donate a save to the server pool |
+
+Additional administrative and owner commands exist for server setup and events.
+
+## Rewards & Saves
+
+Players earn saves through voting and events.
+
+Saves can be:
+- Used to continue rounds
+- Donated to servers
+- Won through drops and giveaways
+
+Saves have no real-world value.
+
+---
+
+## Giveaway Drops
+
+TailWord periodically drops rewards across all servers.
+
+Players can claim rewards directly in chat when drops appear
