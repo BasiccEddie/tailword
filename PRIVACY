@@ -1,0 +1,143 @@
+TailWord Bot – Privacy Policy
+
+Last Updated: 6 February 2026
+
+This Privacy Policy explains how TailWord ("the Bot", "Service") collects, uses, and stores information when users interact with the Bot within Discord.
+
+By using TailWord, you agree to this Privacy Policy.
+
+1. Overview
+
+TailWord is a Discord game bot that operates within servers to provide word-chain gameplay and related features.
+
+The Bot is designed to collect only minimal data necessary for functionality and does not collect personal data beyond Discord identifiers required for operation.
+
+2. Information Collected
+
+The Bot may store the following information:
+
+a) Discord Identifiers
+
+User IDs
+
+Server (Guild) IDs
+
+Channel IDs
+
+Role IDs (if configured)
+
+These identifiers are necessary to track gameplay, saves, and statistics.
+
+b) Gameplay Data
+
+To provide features, the Bot stores:
+
+Word-chain statistics
+
+Correct and failed attempts
+
+Leaderboard data
+
+Server game configuration
+
+Streak and round data
+
+Save balances
+
+Donation and reward records
+
+c) Interaction Data
+
+When commands or buttons are used, the Bot processes:
+
+Command usage
+
+Button interactions
+
+Vote reward events
+
+Messages themselves are not permanently stored, except where required temporarily for gameplay processing.
+
+3. Information Not Collected
+
+TailWord does not collect:
+
+Email addresses
+
+Real names
+
+Passwords
+
+Private messages outside gameplay context
+
+Payment information
+
+IP addresses
+
+Personal files or images
+
+The Bot does not read or store unrelated conversations.
+
+4. Purpose of Data Collection
+
+Collected data is used only to:
+
+Operate the game system
+
+Maintain leaderboards and stats
+
+Manage saves and rewards
+
+Enable server configuration
+
+Prevent abuse and exploitation
+
+Improve service performance
+
+Data is not used for advertising or profiling.
+
+5. Data Storage
+
+Data is stored securely in databases required for operation of the Bot.
+
+Storage duration depends on continued use of the Bot. Data may be removed if:
+
+The Bot leaves a server
+
+Servers remove the Bot
+
+Data resets occur
+
+The service is discontinued
+
+6. Data Sharing
+
+The Bot does not sell or share data with third parties.
+
+Data may only be shared if legally required or necessary to protect service integrity.
+
+7. Data Security
+
+Reasonable technical measures are used to protect stored data. However, no system can guarantee absolute security.
+
+Users acknowledge use of the Service at their own risk.
+
+8. User Control & Data Removal
+
+Server administrators may remove stored data by removing the Bot from their server.
+
+Users may contact the Owner regarding concerns or data questions.
+
+Due to minimal data storage, individual data removal requests may not always be technically possible without affecting gameplay records.
+
+9. Children's Privacy
+
+The Bot follows Discord’s platform rules and does not knowingly collect personal information from children under applicable digital consent laws.
+
+10. Service Changes
+
+The Bot may change data handling practices as features evolve. Continued use implies acceptance of updates.
+
+11. Contact
+
+For privacy concerns or inquiries, contact the Bot Owner via the official support server or Discord contact.
