@@ -1,7 +1,7 @@
 // src/db.js
 const Database = require("better-sqlite3");
 
-const db = new Database("wordchain.sqlite");
+const db = new Database("data/wordchain.sqlite");
 
 // --------------------
 // Tables
