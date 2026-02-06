@@ -1,7 +1,29 @@
 // src/db.js
+const fs = require("fs");
+const path = require("path");
 const Database = require("better-sqlite3");
 
-const db = new Database("data/wordchain.sqlite");
+/*
+  Database path logic:
+  - Use DB_PATH env variable if set
+  - Otherwise use /data on Railway
+  - Otherwise use local project folder
+*/
+
+const defaultPath =
+  process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID
+    ? "/data/wordchain.sqlite"
+    : path.join(process.cwd(), "wordchain.sqlite");
+
+const DB_PATH = process.env.DB_PATH || defaultPath;
+
+// Ensure directory exists
+const dir = path.dirname(DB_PATH);
+if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+console.log("✅ Using database:", DB_PATH);
+
+const db = new Database(DB_PATH);
 
 // --------------------
 // Tables
@@ -34,19 +56,19 @@ CREATE TABLE IF NOT EXISTS user_stats (
   PRIMARY KEY (guild_id, user_id)
 );
 
--- Personal saves earned from top.gg (global, decimals allowed)
+-- Personal saves (global)
 CREATE TABLE IF NOT EXISTS global_saves (
   user_id TEXT PRIMARY KEY,
   saves REAL NOT NULL DEFAULT 0
 );
 
--- Server-wide pool of saves (from /donatesave) (decimals allowed)
+-- Guild save pool
 CREATE TABLE IF NOT EXISTS guild_saves (
   guild_id TEXT PRIMARY KEY,
   saves REAL NOT NULL DEFAULT 0
 );
 
--- Owner giveaway bank (for minting / giveaways) (decimals allowed)
+-- Giveaway bank
 CREATE TABLE IF NOT EXISTS global_bank (
   user_id TEXT PRIMARY KEY,
   saves REAL NOT NULL DEFAULT 0
@@ -57,16 +79,19 @@ CREATE TABLE IF NOT EXISTS global_bank (
 // Prepared queries
 // --------------------
 const q = {
-  // Guild config
   getGuild: db.prepare(`SELECT * FROM guild_config WHERE guild_id = ?`),
+
   upsertGuild: db.prepare(`
     INSERT INTO guild_config (
-      guild_id, channel_id, enabled, last_word, required_start, last_user_id,
-      streak_current, streak_best, last_fail_message_id, fail_role_id
+      guild_id, channel_id, enabled, last_word, required_start,
+      last_user_id, streak_current, streak_best,
+      last_fail_message_id, fail_role_id
     )
     VALUES (
-      @guild_id, @channel_id, @enabled, @last_word, @required_start, @last_user_id,
-      @streak_current, @streak_best, @last_fail_message_id, @fail_role_id
+      @guild_id, @channel_id, @enabled, @last_word,
+      @required_start, @last_user_id,
+      @streak_current, @streak_best,
+      @last_fail_message_id, @fail_role_id
     )
     ON CONFLICT(guild_id) DO UPDATE SET
       channel_id=excluded.channel_id,
@@ -80,13 +105,16 @@ const q = {
       fail_role_id=excluded.fail_role_id
   `),
 
-  // Used words (per guild round)
   clearUsedWords: db.prepare(`DELETE FROM used_words WHERE guild_id = ?`),
   hasUsedWord: db.prepare(`SELECT 1 FROM used_words WHERE guild_id = ? AND word = ?`),
-  addUsedWord: db.prepare(`INSERT OR IGNORE INTO used_words (guild_id, word) VALUES (?, ?)`),
+  addUsedWord: db.prepare(
+    `INSERT OR IGNORE INTO used_words (guild_id, word) VALUES (?, ?)`
+  ),
 
-  // User stats (per guild)
-  getUser: db.prepare(`SELECT * FROM user_stats WHERE guild_id = ? AND user_id = ?`),
+  getUser: db.prepare(
+    `SELECT * FROM user_stats WHERE guild_id = ? AND user_id = ?`
+  ),
+
   upsertUser: db.prepare(`
     INSERT INTO user_stats (guild_id, user_id, valid_count, fail_count)
     VALUES (@guild_id, @user_id, @valid_count, @fail_count)
@@ -95,7 +123,6 @@ const q = {
       fail_count=excluded.fail_count
   `),
 
-  // Global totals across all servers (for /stats)
   globalUserTotals: db.prepare(`
     SELECT
       COALESCE(SUM(valid_count), 0) AS valid,
@@ -104,7 +131,6 @@ const q = {
     WHERE user_id = ?
   `),
 
-  // Rank in server by score = valid - fails
   guildUserRankByScore: db.prepare(`
     SELECT 1 + COUNT(*) AS rank
     FROM user_stats
@@ -112,40 +138,48 @@ const q = {
       AND (valid_count - fail_count) > ?
   `),
 
-  // Leaderboard in server by score
   topUsersByScore: db.prepare(`
-    SELECT user_id, valid_count, fail_count, (valid_count - fail_count) AS score
+    SELECT user_id, valid_count, fail_count,
+           (valid_count - fail_count) AS score
     FROM user_stats
     WHERE guild_id = ?
     ORDER BY score DESC, valid_count DESC
     LIMIT 10
   `),
 
-  // ✅ For giveaway drops: list all enabled guild channels
   listEnabledChannels: db.prepare(`
     SELECT guild_id, channel_id
     FROM guild_config
     WHERE enabled = 1 AND channel_id IS NOT NULL
   `),
 
-  // Global saves (personal)
-  getGlobalSaves: db.prepare(`SELECT saves FROM global_saves WHERE user_id = ?`),
+  getGlobalSaves: db.prepare(
+    `SELECT saves FROM global_saves WHERE user_id = ?`
+  ),
+
   setGlobalSaves: db.prepare(`
-    INSERT INTO global_saves (user_id, saves) VALUES (?, ?)
+    INSERT INTO global_saves (user_id, saves)
+    VALUES (?, ?)
     ON CONFLICT(user_id) DO UPDATE SET saves=excluded.saves
   `),
 
-  // Guild save pool
-  getGuildSaves: db.prepare(`SELECT saves FROM guild_saves WHERE guild_id = ?`),
+  getGuildSaves: db.prepare(
+    `SELECT saves FROM guild_saves WHERE guild_id = ?`
+  ),
+
   setGuildSaves: db.prepare(`
-    INSERT INTO guild_saves (guild_id, saves) VALUES (?, ?)
+    INSERT INTO guild_saves (guild_id, saves)
+    VALUES (?, ?)
     ON CONFLICT(guild_id) DO UPDATE SET saves=excluded.saves
   `),
 
-  // Owner giveaway bank
-  bankGet: db.prepare(`SELECT saves FROM global_bank WHERE user_id = ?`),
+  bankGet: db.prepare(
+    `SELECT saves FROM global_bank WHERE user_id = ?`
+  ),
+
   bankSet: db.prepare(`
-    INSERT INTO global_bank (user_id, saves) VALUES (?, ?)
+    INSERT INTO global_bank (user_id, saves)
+    VALUES (?, ?)
     ON CONFLICT(user_id) DO UPDATE SET saves=excluded.saves
   `),
 };
@@ -182,7 +216,6 @@ function getOrCreateUser(guildId, userId) {
   return u;
 }
 
-// Global personal saves
 function getGlobalSaves(userId) {
   const row = q.getGlobalSaves.get(userId);
   return row ? Number(row.saves) : 0;
@@ -192,7 +225,6 @@ function setGlobalSaves(userId, saves) {
   q.setGlobalSaves.run(userId, Number(saves));
 }
 
-// Guild pool saves
 function getGuildSaves(guildId) {
   const row = q.getGuildSaves.get(guildId);
   return row ? Number(row.saves) : 0;
@@ -202,7 +234,6 @@ function setGuildSaves(guildId, saves) {
   q.setGuildSaves.run(guildId, Number(saves));
 }
 
-// Owner giveaway bank
 function getBankSaves(userId) {
   const row = q.bankGet.get(userId);
   return row ? Number(row.saves) : 0;
